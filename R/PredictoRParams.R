@@ -49,6 +49,7 @@ PredictoRParams.default <- function(idColName,
                                     responseColName,
                                     featuresMetadata,
                                     modelsMetadata,
+                                    buildFeature,
                                     getTrainData,
                                     getValidationData,
                                     getTestData,
@@ -58,6 +59,7 @@ PredictoRParams.default <- function(idColName,
   this$responseColName <- responseColName
   this$featuresMetadata <- featuresMetadata
   this$modelsMetadata <- modelsMetadata
+  this$buildFeature <- buildFeature
   this$getTrainData <- getTrainData
   this$getValidationData <- getValidationData
   this$getTestData <- getTestData

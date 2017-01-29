@@ -46,6 +46,7 @@ kTestFileName <- "R/samples/titanic/test.csv"
 
 # Used on feature engineering
 kTitles <- c("capt", "col", "don", "dr", "major", "master", "miss", "mlle", "mr", "mrs", "rev")
+kCabinLetters <- c("a", "b", "c", "d", "e", "f", "g", "t")
 
 ################################################################################
 # General Functions
@@ -114,8 +115,36 @@ PreProcess <- function() {
 # PredictoR Functions
 ################################################################################
 
+BuildFeature <- function(x, ...) UseMethod("BuildFeature")
+BuildFeature.data.table <- function(x, feature) {
+
+  if ("firstname" == feature) {
+    if (! "firstname" %in% colnames(x)) {
+      nameTokens <- strsplit(x[, name], ", ")
+      x[, firstname := sapply(nameTokens, FUN=function(a) { stri_trim(a[2]) }) ]
+    }
+  }
+
+  if ("lastname" == feature) {
+    nameTokens <- strsplit(x[, name], ", ")
+    x[, lastname  := sapply(nameTokens, FUN=function(a) { stri_trim(a[1]) }) ]
+  }
+
+  if (startsWith(feature, "title.")) {
+    title <- strsplit(feature, "\\.")[2]
+    BuildFeature(x, "firstname")
+    ExtractWordAsFlag(x, paste0(title, "."), "firstname", paste0("title.", title))
+  }
+
+  if (startsWith(feature, "cabin.")) {
+    cabinLetter <- strsplit(feature, "\\.")[2]
+    ExtractWordAsFlag(x, cabinLetter, "cabin", paste0("cabin.", cabinLetter))
+  }
+}
+
 GetFeaturesMetadata <- function () {
   return (data.table(feature=c("pclass",
+                               "firstname",
                                "lastname",
                                "sex",
                                "age",
@@ -125,43 +154,20 @@ GetFeaturesMetadata <- function () {
                                "fare",
                                "cabin",
                                "embarked",
+                               paste0("cabin.", kCabinLetters),
                                paste0("title.", kTitles))))
 }
 
 GetModelsMetadata <- function () {
+  return (data.table(model=c("rpart",
+                     method="class")))
+}
+
+GetTrainData <- function (trainFactor, folds, trainFolds) {
   return (NULL)
 }
 
-AddFeatures <- function(x, ...) UseMethod("v")
-AddFeatures.data.table <- function(x, features) {
-  # # split last and first name
-  # nameTokens <- strsplit(x[, name], ", ")
-  # x[, firstname := sapply(nameTokens, FUN=function(a) { stri_trim(a[2]) }) ]
-  # x[, lastname  := sapply(nameTokens, FUN=function(a) { stri_trim(a[1]) }) ]
-  # x[, name := NULL ]
-  #
-  # # extract title from first name as flags
-  # # convert words to flags
-  # titles <- paste0("title.", kTitles)
-  # for (title in titles) {
-  #   ExtractWordAsFlag(x, paste0(title, "."), "firstname", paste0("is", title))
-  # }
-  # x[, firstname := stri_trim(firstname) ]
-  #
-  # # extract letter from cabin
-  # x[, cabin := tolower(cabin) ]
-  # cabinLetters <- c("a", "b", "c", "d", "e", "f", "g", "t")
-  # for (cabinLetter in cabinLetters) {
-  #   ExtractWordAsFlag(x, cabinLetter, "cabin", paste0("cabin", cabinLetter))
-  # }
-  # x[, cabin := stri_trim(cabin) ]
-}
-
-GetTrainData <- function (trainFactor, folds, trainFolds, features) {
-  return (NULL)
-}
-
-GetValidationData <- function (trainFactor, folds, validationFolds, features) {
+GetValidationData <- function (trainFactor, folds, validationFolds) {
   return (NULL)
 }
 
@@ -191,6 +197,7 @@ Main <- function() {
                                      responseColName="survived",
                                      featuresMetadata=GetFeaturesMetadata(),
                                      modelsMetadata=GetModelsMetadata(),
+                                     buildFeature=BuildFeature,
                                      getTrainData=GetTrainData,
                                      getValidationData=GetValidationData,
                                      getTestData=GetTestData,

@@ -31,13 +31,14 @@ CreateSamplePredictoRParams <- function() {
   featuresMetadata <- data.table(feature=c("name", "age"))
   modelsMetadata <- data.table(model=c("rpart"))
   y <- PredictoRParams(idColName=idColName,
-                        responseColName=responseColName,
-                        featuresMetadata=featuresMetadata,
-                        modelsMetadata=modelsMetadata,
-                        getTrainData=NULL,
-                        getValidationData=NULL,
-                        getTestData=NULL,
-                        evaluate=NULL)
+                       responseColName=responseColName,
+                       featuresMetadata=featuresMetadata,
+                       modelsMetadata=modelsMetadata,
+                       buildFeature=NULL,
+                       getTrainData=NULL,
+                       getValidationData=NULL,
+                       getTestData=NULL,
+                       evaluate=NULL)
   return (y)
 }
 
@@ -54,6 +55,7 @@ test.PredictoRParams <- function () {
                         responseColName=responseColName,
                         featuresMetadata=featuresMetadata,
                         modelsMetadata=modelsMetadata,
+                        buildFeature=NULL,
                         getTrainData=NULL,
                         getValidationData=NULL,
                         getTestData=NULL,
