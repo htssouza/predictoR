@@ -36,7 +36,6 @@ CreateSamplePredictoRParams <- function() {
                        modelsMetadata=modelsMetadata,
                        buildFeature=NULL,
                        getTrainData=NULL,
-                       getValidationData=NULL,
                        getTestData=NULL,
                        evaluate=NULL)
   return (y)
@@ -57,7 +56,6 @@ test.PredictoRParams <- function () {
                         modelsMetadata=modelsMetadata,
                         buildFeature=NULL,
                         getTrainData=NULL,
-                        getValidationData=NULL,
                         getTestData=NULL,
                         evaluate=NULL)
   checkEquals(x1$idColName, idColName)

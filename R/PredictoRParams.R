@@ -32,11 +32,8 @@
 #   buildFeature(x, feature)
 #     add specified feature on x dataset
 #
-#   getTrainData(trainFactor, folds, trainFolds)
+#   getTrainData(sampleFactor, sampleSeed)
 #     return data.table with train data
-#
-#   getValidationData(trainFactor, folds, validationFolds)
-#     return data.table with validation data
 #
 #   getTestData()
 #     return da.table with train data
@@ -58,7 +55,6 @@ PredictoRParams.default <- function(idColName,
                                     modelsMetadata,
                                     buildFeature,
                                     getTrainData,
-                                    getValidationData,
                                     getTestData,
                                     evaluate) {
   this <- list()
@@ -68,7 +64,6 @@ PredictoRParams.default <- function(idColName,
   this$modelsMetadata <- modelsMetadata
   this$buildFeature <- buildFeature
   this$getTrainData <- getTrainData
-  this$getValidationData <- getValidationData
   this$getTestData <- getTestData
   this$evaluate <- evaluate
   class(this) <- "PredictoRParams"
