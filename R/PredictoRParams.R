@@ -19,11 +19,18 @@
 #   modelsMetadata:
 #     data.table with model metadata
 #     example:
-#       models <- data.table(model=rep("rpart", 7),
+#       models <- data.table(trainFactor=rep(".5", 7),
+#                            folds=rep(5, 7),
+#                            trainFolds=rep(4, 7),
+#                            validationFolds=rep(1, 7),
+#                            model=rep("rpart", 7),
 #                            method=rep("class", 7),
 #                            minsplit=c(1, 2, 3, 5, 10, 20, 30))
 #
 # function descriptions:
+#
+#   buildFeature(x, feature)
+#     add specified feature on x dataset
 #
 #   getTrainData(trainFactor, folds, trainFolds, features)
 #     return data.table with train data
@@ -31,7 +38,7 @@
 #   getValidationData(trainFactor, folds, validationFolds, features)
 #     return data.table with validation data
 #
-#   getTestData(features)
+#   getTestData()
 #     return da.table with train data
 #
 #   evaluate(prediction, expected)

@@ -56,22 +56,12 @@ LoadFiles <- function() {
   loginfo("LoadFiles: begin")
 
   loginfo("LoadFiles: loading train CSV")
-  Globals$train <<- read.csv(kTrainFileName)
+  Globals$train <<- fread(kTrainFileName)
 
   loginfo("LoadFiles: loading test CSV")
-  Globals$test <<- read.csv(kTestFileName)
+  Globals$test <<- fread(kTestFileName)
 
   loginfo("LoadFiles: end")
-}
-
-# if source col has word, set targetCol with 1, otherwise 0
-ExtractWordAsFlag <- function(x, ...) UseMethod("ExtractWordAsFlag")
-ExtractWordAsFlag.data.table <- function(x, word, sourceCol, targetCol=NA) {
-  if (is.na(targetCol)) targetCol <- word
-  pattern <- word
-  x[, eval(targetCol) := 0]
-  x[grep(pattern, x[, get(sourceCol)], ignore.case=TRUE), eval(targetCol) := 1 ]
-  x[, eval(sourceCol) := gsub(pattern, "", get(sourceCol), ignore.case=TRUE) ]
 }
 
 PreProcessDataSet <- function(x) {
@@ -91,7 +81,7 @@ PreProcessDataSet <- function(x) {
       if (!is.null(colName)) {
         col <- x[, get(colName)]
         colClass <- class(col)
-        if(colClass != "character") {
+        if(colClass == "character") {
           colsToConvert <- c(colsToConvert, colName)
         }
       }
@@ -118,33 +108,30 @@ PreProcess <- function() {
 BuildFeature <- function(x, ...) UseMethod("BuildFeature")
 BuildFeature.data.table <- function(x, feature) {
 
-  if ("firstname" == feature) {
-    if (! "firstname" %in% colnames(x)) {
-      nameTokens <- strsplit(x[, name], ", ")
-      x[, firstname := sapply(nameTokens, FUN=function(a) { stri_trim(a[2]) }) ]
-    }
-  }
-
   if ("lastname" == feature) {
     nameTokens <- strsplit(x[, name], ", ")
-    x[, lastname  := sapply(nameTokens, FUN=function(a) { stri_trim(a[1]) }) ]
+    return (sapply(nameTokens, FUN=function(a) { stri_trim(a[1]) }))
   }
 
   if (startsWith(feature, "title.")) {
-    title <- strsplit(feature, "\\.")[2]
-    BuildFeature(x, "firstname")
-    ExtractWordAsFlag(x, paste0(title, "."), "firstname", paste0("title.", title))
+    nameTokens <- strsplit(x[, name], ", ")
+    firstName <- sapply(nameTokens, FUN=function(a) { stri_trim(a[2]) })
+    title <- strsplit(feature, "\\.")[[1]][2]
+    y <- ifelse(grepl(paste0(title, "\\."), firstName, ignore.case=TRUE), 1, 0)
+    return (y)
   }
 
   if (startsWith(feature, "cabin.")) {
-    cabinLetter <- strsplit(feature, "\\.")[2]
-    ExtractWordAsFlag(x, cabinLetter, "cabin", paste0("cabin.", cabinLetter))
+    cabinLetter <- strsplit(feature, "\\.")[[1]][2]
+    y <- ifelse(grepl(cabinLetter, x[, cabin], ignore.case=TRUE), 1, 0)
+    return (y)
   }
+
+  return (NULL)
 }
 
 GetFeaturesMetadata <- function () {
   return (data.table(feature=c("pclass",
-                               "firstname",
                                "lastname",
                                "sex",
                                "age",
@@ -163,16 +150,16 @@ GetModelsMetadata <- function () {
                      method="class")))
 }
 
-GetTrainData <- function (trainFactor, folds, trainFolds) {
+GetTrainData <- function (trainFactor, folds, trainFolds, features) {
   return (NULL)
 }
 
-GetValidationData <- function (trainFactor, folds, validationFolds) {
+GetValidationData <- function (trainFactor, folds, validationFolds, features) {
   return (NULL)
 }
 
-GetTestData <- function (features) {
-  return (NULL)
+GetTestData <- function () {
+  return (Globals$test)
 }
 
 Evaluate <- function (prediction, expected) {
