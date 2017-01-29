@@ -60,11 +60,6 @@ BuildFeature.data.table <- function(x, feature) {
     return (y)
   }
 
-  if ("lastname" == feature) {
-    nameTokens <- strsplit(x[, name], ", ")
-    y <- sapply(nameTokens, FUN=function(a) { stri_trim(a[1]) })
-  }
-
   if (startsWith(feature, "title.")) {
     nameTokens <- strsplit(x[, name], ", ")
     firstName <- sapply(nameTokens, FUN=function(a) { stri_trim(a[2]) })
@@ -83,14 +78,11 @@ BuildFeature.data.table <- function(x, feature) {
 
 GetFeaturesMetadata <- function() {
   features <- data.table(feature=c("pclass",
-                                   "lastname",
                                    "sex",
                                    "age",
                                    "sibsp",
                                    "parch",
-                                   "ticket",
                                    "fare",
-                                   "cabin",
                                    "embarked",
                                    paste0("cabin.", kCabinLetters),
                                    paste0("title.", kTitles)))
@@ -161,34 +153,30 @@ GetTestData <- function() {
 }
 
 Evaluate <- function(prediction, expected) {
-  return (NULL)
+  return (length(expected[prediction == expected]) / length(expected))
 }
 
 ################################################################################
 # Main Flow
 ################################################################################
 
-Main <- function() {
-  loginfo("Main: begin")
+loginfo("Main: begin")
 
-  loginfo("Main: creating PredictoRParams")
-  predictoRParams <- PredictoRParams(idColName="passengerid",
-                                     responseColName="survived",
-                                     featuresMetadata=GetFeaturesMetadata(),
-                                     modelsMetadata=GetModelsMetadata(),
-                                     buildFeature=BuildFeature,
-                                     getTrainData=GetTrainData,
-                                     getTestData=GetTestData,
-                                     evaluate=Evaluate)
-  loginfo(capture.output(predictoRParams))
+loginfo("Main: creating PredictoRParams")
+predictoRParams <- PredictoRParams(idColName="passengerid",
+                                   responseColName="survived",
+                                   featuresMetadata=GetFeaturesMetadata(),
+                                   modelsMetadata=GetModelsMetadata(),
+                                   buildFeature=BuildFeature,
+                                   getTrainData=GetTrainData,
+                                   getTestData=GetTestData,
+                                   evaluate=Evaluate)
+loginfo(capture.output(predictoRParams))
 
-  loginfo("Main: creating PredictoR")
-  predictoR <- PredictoR(predictoRParams)
+loginfo("Main: creating PredictoR")
+predictoR <- PredictoR(predictoRParams)
 
-  loginfo("Main: executing PredictoR")
-  Execute(predictoR)
+loginfo("Main: executing PredictoR")
+Execute(predictoR)
 
-  loginfo("Main: end")
-}
-
-Main()
+loginfo("Main: end")

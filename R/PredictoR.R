@@ -46,37 +46,6 @@ print.PredictoR <- function(object) {
   writeLines(capture.output(object$params))
 }
 
-GetFormula <- function(object) {
-  featureNames <- object$params$featuresMetadata[, feature]
-  formulaText <- paste0(object$params$responseColName, " ~ ", paste0(featureNames, collapse=" + "))
-  y <- as.formula(formulaText)
-  return (y)
-}
-
-Fit.rpart <- function(object, modelMetadata, data) {
-  loginfo("Fit.rpart: begin")
-  library(rpart)
-  control <- NULL
-  if (! is.null(modelMetadata$minsplit)) {
-    control <- rpart.control(minsplit=modelMetadata$minsplit)
-  }
-  fit <- rpart(GetFormula(object),
-               data=data,
-               method=modelMetadata$method,
-               control=control)
-  loginfo("Fit.rpart: end")
-  return (fit)
-}
-
-Fit <- function(object, modelMetadata, data) {
-  loginfo("Fit: begin")
-  if (modelMetadata$model == "rpart") {
-    return (Fit.rpart(object, modelMetadata, data))
-  }
-  loginfo("Fit: end")
-  return (NULL)
-}
-
 BuildFeatures <- function(object, data) {
   loginfo("BuildFeatures: begin")
   for(feature in object$params$featuresMetadata[, feature]) {
@@ -93,8 +62,8 @@ BuildFeatures <- function(object, data) {
 
 BuildTrainValidationData <- function(object, sampleFactor, sampleSeed, folds) {
   loginfo("BuildTrainValidationData: begin")
-  loginfo("modelMetadata$sampleFactor:")
-  loginfo(modelMetadata$sampleFactor)
+  loginfo("sampleFactor:")
+  loginfo(sampleFactor)
   data <- object$params$getTrainData(sampleFactor = sampleFactor,
                                      sampleSeed = sampleSeed)
   if (! kFoldColName %in% colnames(data)) {
@@ -126,6 +95,53 @@ BuildTestData <- function(object) {
   loginfo("BuildTestData: end")
 }
 
+GetFormula <- function(object) {
+  featureNames <- object$params$featuresMetadata[, feature]
+  formulaText <- paste0(object$params$responseColName, " ~ ", paste0(featureNames, collapse=" + "))
+  y <- as.formula(formulaText)
+  return (y)
+}
+
+Fit.rpart <- function(object, modelMetadata, data) {
+  loginfo("Fit.rpart: begin")
+  library(rpart)
+  control <- NULL
+  if (! is.null(modelMetadata$minsplit)) {
+    control <- rpart.control(minsplit=modelMetadata$minsplit)
+  }
+  fit <- rpart(GetFormula(object),
+               data=data,
+               method=modelMetadata$method,
+               control=control)
+  loginfo("Fit.rpart: end")
+  return (fit)
+}
+
+Fit <- function(object, modelMetadata, data) {
+  loginfo("Fit: begin")
+  if (modelMetadata$model == "rpart") {
+    return (Fit.rpart(object, modelMetadata, data))
+  }
+  loginfo("Fit: end")
+  return (NULL)
+}
+
+PredictModel.rpart <- function(object, modelMetadata, fit, validation) {
+  loginfo("PredictModel.rpart: end")
+  y <- predict(fit, validation, type=modelMetadata$method)
+  loginfo("PredictModel.rpart: end")
+  return (y)
+}
+
+PredictModel <- function(object, modelMetadata, fit, validation) {
+  loginfo("PredictModel: begin")
+  if (modelMetadata$model == "rpart") {
+    return (PredictModel.rpart(object, modelMetadata, fit, validation))
+  }
+  loginfo("PredictModel: end")
+  return (NULL)
+}
+
 Execute <- function(x, ...) UseMethod("Execute")
 Execute.PredictoR <- function(object) {
   loginfo("Execute: begin")
@@ -137,8 +153,8 @@ Execute.PredictoR <- function(object) {
 
   # iterate on each model metadata
   previousModelMetadata <- NULL
-  for(modelMetadataIndex in 1:nrow(modelsMetadata)) {
-    modelMetadata <- modelsMetadata[modelMetadataIndex]
+  for(modelMetadataId in (modelsMetadata[, id])) {
+    modelMetadata <- modelsMetadata[id == modelMetadataId]
 
     # build data, only if required
     needsToBuildData <- FALSE
@@ -159,13 +175,13 @@ Execute.PredictoR <- function(object) {
       gc()
     }
 
+    # train
     fit <- Fit(object, modelMetadata, train)
 
-    # validate
-    # validationResponse <- PredictValidation(object, modelMetadata, fit, validation)
-    # evaluation
-    # validationScore <- Evaluate(validationResponse, validation[, get(object$params$responseColName)])
-    # modelMetadata[, score: = validationScore]
+    # validate&evaluate
+    validationResponse <- PredictModel(object, modelMetadata, fit, validation)
+    validationScore <- object$params$evaluate(validationResponse, validation[, get(object$params$responseColName)])
+    modelsMetadata[id == modelMetadataId, score := validationScore]
 
     # save for next loop
     previousModelMetadata <- modelMetadata
