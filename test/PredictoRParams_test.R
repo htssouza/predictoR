@@ -45,7 +45,7 @@ CreateSamplePredictoRParams <- function() {
 # Tests
 ################################################################################
 
-test.PredictoRParams <- function () {
+test.PredictoRParams <- function() {
   idColName <- "id"
   responseColName <- "response"
   featuresMetadata <- data.table(feature=c("name", "age"))
@@ -64,7 +64,7 @@ test.PredictoRParams <- function () {
   checkEquals(x1$modelsMetadata, modelsMetadata)
 }
 
-test.print.PredictoRParams <- function () {
+test.print.PredictoRParams <- function() {
   x1 <- CreateSamplePredictoRParams()
   print(x1)
 }

@@ -26,13 +26,13 @@ source ("test/PredictoRParams_test.R")
 # Tests
 ################################################################################
 
-test.PredictoR <- function () {
+test.PredictoR <- function() {
   params <- CreateSamplePredictoRParams()
   x1 <- PredictoR(params=params)
   checkEquals(x1$params, params)
 }
 
-test.print.PredictoRParams <- function () {
+test.print.PredictoRParams <- function() {
   params <- CreateSamplePredictoRParams()
   x1 <- PredictoR(params=params)
   print(x1)

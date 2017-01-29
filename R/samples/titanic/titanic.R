@@ -74,7 +74,7 @@ BuildFeature.data.table <- function(x, feature) {
   return (y)
 }
 
-GetFeaturesMetadata <- function () {
+GetFeaturesMetadata <- function() {
   features <- data.table(feature=c("pclass",
                                    "lastname",
                                    "sex",
@@ -90,7 +90,7 @@ GetFeaturesMetadata <- function () {
   return (features)
 }
 
-GetModelsMetadata <- function () {
+GetModelsMetadata <- function() {
   models <- data.table(sampleFactor=rep(".5", 7),
                        sampleSeed=rep(1994, 7),
                        folds=rep(5, 7),
@@ -133,7 +133,7 @@ PreProcess <- function(x) {
   return (x)
 }
 
-GetTrainData <- function (sampleFactor, sampleSeed) {
+GetTrainData <- function(sampleFactor, sampleSeed) {
   set.seed(sampleSeed)
   loginfo("GetTrainData: begin")
   y <- fread(kTrainFileName)
@@ -144,7 +144,7 @@ GetTrainData <- function (sampleFactor, sampleSeed) {
   return (y)
 }
 
-GetTestData <- function () {
+GetTestData <- function() {
   loginfo("GetTestData: begin")
   set.seed(sampleSeed)
   y <- fread(kTestFileName)
@@ -153,7 +153,7 @@ GetTestData <- function () {
   return (y)
 }
 
-Evaluate <- function (prediction, expected) {
+Evaluate <- function(prediction, expected) {
   return (NULL)
 }
 
