@@ -47,11 +47,9 @@ print.PredictoR <- function(object) {
 }
 
 GetFormula <- function(object) {
-  loginfo("GetFormula: begin")
   featureNames <- object$params$featuresMetadata[, feature]
   formulaText <- paste0(object$params$responseColName, " ~ ", paste0(featureNames, collapse=" + "))
   y <- as.formula(formulaText)
-  loginfo("GetFormula: end")
   return (y)
 }
 
