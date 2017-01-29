@@ -67,14 +67,13 @@ PredictoRParams.default <- function(idColName,
 }
 
 print.PredictoRParams <- function(object) {
-  cat("PredictoRParams:")
-  cat("\n idColName: ")
-  cat(object$idColName)
-  cat("\n responseColName: ")
-  cat(object$responseColName)
-  cat("\n featuresMetadata: ")
-  cat(capture.output(object$featuresMetadata))
-  cat("\n modelsMetadata: ")
-  cat(capture.output(object$modelsMetadata))
-  cat("\n")
+  writeLines("PredictoRParams:")
+  writeLines("idColName:")
+  writeLines(object$idColName)
+  writeLines("responseColName:")
+  writeLines(object$responseColName)
+  writeLines("featuresMetadata:")
+  writeLines(capture.output(object$featuresMetadata))
+  writeLines("modelsMetadata:")
+  writeLines(capture.output(object$modelsMetadata))
 }

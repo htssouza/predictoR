@@ -16,8 +16,7 @@ PredictoR.default <- function(params) {
 }
 
 print.PredictoR <- function(object) {
-  cat("PredictoR:")
-  cat("\n params: ")
-  cat(capture.output(object$params))
-  cat("\n")
+  writeLines("PredictoR:")
+  writeLines("params:")
+  writeLines(capture.output(object$params))
 }
