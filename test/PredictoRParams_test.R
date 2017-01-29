@@ -22,6 +22,26 @@ library(RUnit)
 source ("R/PredictoRParams.R")
 
 ################################################################################
+# Functions
+################################################################################
+
+CreateSamplePredictoRParams <- function() {
+  idColName <- "id"
+  responseColName <- "response"
+  featuresMetadata <- data.table(feature=c("name", "age"))
+  modelsMetadata <- data.table(model=c("rpart"))
+  y <- PredictoRParams(idColName=idColName,
+                        responseColName=responseColName,
+                        featuresMetadata=featuresMetadata,
+                        modelsMetadata=modelsMetadata,
+                        getTrainData=NULL,
+                        getValidationData=NULL,
+                        getTestData=NULL,
+                        evaluate=NULL)
+  return (y)
+}
+
+################################################################################
 # Tests
 ################################################################################
 
@@ -45,17 +65,6 @@ test.PredictoRParams <- function () {
 }
 
 test.print.PredictoRParams <- function () {
-  idColName <- "id"
-  responseColName <- "response"
-  featuresMetadata <- data.table(feature=c("name", "age"))
-  modelsMetadata <- data.table(model=c("rpart"))
-  x1 <- PredictoRParams(idColName=idColName,
-                        responseColName=responseColName,
-                        featuresMetadata=featuresMetadata,
-                        modelsMetadata=modelsMetadata,
-                        getTrainData=NULL,
-                        getValidationData=NULL,
-                        getTestData=NULL,
-                        evaluate=NULL)
+  x1 <- CreateSamplePredictoRParams()
   print(x1)
 }
