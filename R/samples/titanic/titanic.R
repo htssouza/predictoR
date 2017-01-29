@@ -53,6 +53,13 @@ BuildFeature.data.table <- function(x, feature) {
   loginfo(feature)
   y <- NULL
 
+  # local cache
+  if(feature %in% colnames(x)) {
+    y <- x[, get(feature)]
+    loginfo("BuildFeature: end")
+    return (y)
+  }
+
   if ("lastname" == feature) {
     nameTokens <- strsplit(x[, name], ", ")
     y <- sapply(nameTokens, FUN=function(a) { stri_trim(a[1]) })
@@ -91,7 +98,7 @@ GetFeaturesMetadata <- function() {
 }
 
 GetModelsMetadata <- function() {
-  models <- data.table(sampleFactor=rep(".5", 7),
+  models <- data.table(sampleFactor=rep(.5, 7),
                        sampleSeed=rep(1994, 7),
                        folds=rep(5, 7),
                        trainFolds=rep(4, 7),
@@ -174,6 +181,13 @@ Main <- function() {
                                      getTestData=GetTestData,
                                      evaluate=Evaluate)
   loginfo(capture.output(predictoRParams))
+
+  loginfo("Main: creating PredictoR")
+  predictoR <- PredictoR(predictoRParams)
+
+  loginfo("Main: executing PredictoR")
+  Execute(predictoR)
+
   loginfo("Main: end")
 }
 
