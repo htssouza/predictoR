@@ -131,30 +131,38 @@ BuildFeature.data.table <- function(x, feature) {
 }
 
 GetFeaturesMetadata <- function () {
-  return (data.table(feature=c("pclass",
-                               "lastname",
-                               "sex",
-                               "age",
-                               "sibsp",
-                               "parch",
-                               "ticket",
-                               "fare",
-                               "cabin",
-                               "embarked",
-                               paste0("cabin.", kCabinLetters),
-                               paste0("title.", kTitles))))
+  features <- data.table(feature=c("pclass",
+                                   "lastname",
+                                   "sex",
+                                   "age",
+                                   "sibsp",
+                                   "parch",
+                                   "ticket",
+                                   "fare",
+                                   "cabin",
+                                   "embarked",
+                                   paste0("cabin.", kCabinLetters),
+                                   paste0("title.", kTitles)))
+  return (features)
 }
 
 GetModelsMetadata <- function () {
-  return (data.table(model=c("rpart",
-                     method="class")))
+  models <- data.table(trainFactor=rep(".5", 7),
+                       folds=rep(5, 7),
+                       trainFolds=rep(4, 7),
+                       validationFolds=rep(1, 7),
+                       model=rep("rpart", 7),
+                       method=rep("class", 7),
+                       minsplit=c(1, 2, 3, 5, 10, 20, 30))
+
+  return (models)
 }
 
-GetTrainData <- function (trainFactor, folds, trainFolds, features) {
+GetTrainData <- function (trainFactor, folds, trainFolds) {
   return (NULL)
 }
 
-GetValidationData <- function (trainFactor, folds, validationFolds, features) {
+GetValidationData <- function (trainFactor, folds, validationFolds) {
   return (NULL)
 }
 
@@ -179,7 +187,7 @@ Main <- function() {
   loginfo("Main: pre-processing files")
   PreProcess()
 
-  loginfo("Main: creating PredictorRParams")
+  loginfo("Main: creating PredictoRParams")
   predictoRParams <- PredictoRParams(idColName="passengerid",
                                      responseColName="survived",
                                      featuresMetadata=GetFeaturesMetadata(),

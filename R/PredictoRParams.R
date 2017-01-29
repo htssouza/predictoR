@@ -32,10 +32,10 @@
 #   buildFeature(x, feature)
 #     add specified feature on x dataset
 #
-#   getTrainData(trainFactor, folds, trainFolds, features)
+#   getTrainData(trainFactor, folds, trainFolds)
 #     return data.table with train data
 #
-#   getValidationData(trainFactor, folds, validationFolds, features)
+#   getValidationData(trainFactor, folds, validationFolds)
 #     return data.table with validation data
 #
 #   getTestData()
