@@ -1,5 +1,5 @@
 ################################################################################
-# Predictor
+# PredictoR
 ################################################################################
 
 ################################################################################
@@ -20,12 +20,39 @@ library(logging)
 ################################################################################
 
 source ("R/PredictoRParams.R")
+source ("R/PredictoROutput.R")
 
 ################################################################################
 # Constants
 ################################################################################
 
 kFoldColName <- "_fold"
+
+################################################################################
+# Rpart specific Functions
+################################################################################
+
+Fit.rpart <- function(object, modelMetadata, data) {
+  loginfo("Fit.rpart: begin")
+  library(rpart)
+  control <- NULL
+  if (! is.null(modelMetadata$minsplit)) {
+    control <- rpart.control(minsplit=modelMetadata$minsplit)
+  }
+  fit <- rpart(GetFormula(object),
+               data=data,
+               method=modelMetadata$method,
+               control=control)
+  loginfo("Fit.rpart: end")
+  return (fit)
+}
+
+PredictModel.rpart <- function(object, modelMetadata, fit, validation) {
+  loginfo("PredictModel.rpart: end")
+  y <- predict(fit, validation, type=modelMetadata$method)
+  loginfo("PredictModel.rpart: end")
+  return (y)
+}
 
 ################################################################################
 # Functions
@@ -49,10 +76,11 @@ print.PredictoR <- function(object) {
 BuildFeatures <- function(object, data) {
   loginfo("BuildFeatures: begin")
   for(feature in object$params$featuresMetadata[, feature]) {
-    featureData <- object$params$buildFeature(data, feature)
-    if (! is.null(featureData)) {
-      if (! feature %in% colnames(data)) {
+    if (! feature %in% colnames(data)) {
+      featureData <- object$params$buildFeature(data, feature)
+      if (! is.null(featureData)) {
         data[, eval(feature) := featureData]
+        data <- data.table(data)
       }
     }
   }
@@ -90,9 +118,10 @@ BuildValidationData <- function(object, data, trainFolds) {
 
 BuildTestData <- function(object) {
   loginfo("BuildTestData: begin")
-  data <- object$params$getTestData()
-  BuildFeatures(object, data)
+  data <- data.table(object$params$getTestData())
+  data <- BuildFeatures(object, data)
   loginfo("BuildTestData: end")
+  return (data)
 }
 
 GetFormula <- function(object) {
@@ -100,21 +129,6 @@ GetFormula <- function(object) {
   formulaText <- paste0(object$params$responseColName, " ~ ", paste0(featureNames, collapse=" + "))
   y <- as.formula(formulaText)
   return (y)
-}
-
-Fit.rpart <- function(object, modelMetadata, data) {
-  loginfo("Fit.rpart: begin")
-  library(rpart)
-  control <- NULL
-  if (! is.null(modelMetadata$minsplit)) {
-    control <- rpart.control(minsplit=modelMetadata$minsplit)
-  }
-  fit <- rpart(GetFormula(object),
-               data=data,
-               method=modelMetadata$method,
-               control=control)
-  loginfo("Fit.rpart: end")
-  return (fit)
 }
 
 Fit <- function(object, modelMetadata, data) {
@@ -126,13 +140,6 @@ Fit <- function(object, modelMetadata, data) {
   return (NULL)
 }
 
-PredictModel.rpart <- function(object, modelMetadata, fit, validation) {
-  loginfo("PredictModel.rpart: end")
-  y <- predict(fit, validation, type=modelMetadata$method)
-  loginfo("PredictModel.rpart: end")
-  return (y)
-}
-
 PredictModel <- function(object, modelMetadata, fit, validation) {
   loginfo("PredictModel: begin")
   if (modelMetadata$model == "rpart") {
@@ -142,9 +149,28 @@ PredictModel <- function(object, modelMetadata, fit, validation) {
   return (NULL)
 }
 
+GetBestModelMetadata <- function (modelsMetadata) {
+  sortedOutputs <- modelsMetadata[order(-score)]
+  best <- sortedOutputs[1]
+  if (is.na(best$score)) {
+    return (NULL)
+  }
+  return (best)
+}
+
 Execute <- function(x, ...) UseMethod("Execute")
 Execute.PredictoR <- function(object) {
   loginfo("Execute: begin")
+
+  # fits
+  fits <- list()
+
+  # set order (reuse data)
+  object$params$modelsMetadata <- object$params$modelsMetadata[order(sampleFactor,
+                                                                     sampleSeed,
+                                                                     folds,
+                                                                     trainFolds,
+                                                                     model)]
 
   # add id and score on modelsMetadata
   modelsMetadata <- object$params$modelsMetadata
@@ -156,7 +182,11 @@ Execute.PredictoR <- function(object) {
   for(modelMetadataId in (modelsMetadata[, id])) {
     modelMetadata <- modelsMetadata[id == modelMetadataId]
 
-    # build data, only if required
+    loginfo("Execute: training and evaluating")
+    loginfo("modelMetadata:")
+    loginfo(capture.output(modelMetadata))
+
+    # build data, only if necessary
     needsToBuildData <- FALSE
     if (is.null(previousModelMetadata)) {
       needsToBuildData <- TRUE
@@ -169,6 +199,7 @@ Execute.PredictoR <- function(object) {
       }
     }
     if (needsToBuildData) {
+      loginfo("Execute: needs to rebuild data")
       data <- BuildTrainValidationData(object, modelMetadata$sampleFactor, modelMetadata$sampleSeed, modelMetadata$folds)
       train <- BuildTrainData(object, data, modelMetadata$trainFolds)
       validation <- BuildValidationData(object, data, modelMetadata$trainFolds)
@@ -176,15 +207,38 @@ Execute.PredictoR <- function(object) {
     }
 
     # train
+    loginfo("Execute: fitting")
     fit <- Fit(object, modelMetadata, train)
+    fits[[modelMetadataId]] <- fit
 
     # validate&evaluate
+    loginfo("Execute: validation prediction")
     validationResponse <- PredictModel(object, modelMetadata, fit, validation)
+    loginfo("Execute: evaluation")
     validationScore <- object$params$evaluate(validationResponse, validation[, get(object$params$responseColName)])
+    loginfo("score:")
+    loginfo(capture.output(validationScore))
     modelsMetadata[id == modelMetadataId, score := validationScore]
 
     # save for next loop
     previousModelMetadata <- modelMetadata
   }
+
+  prediction <- NULL
+  bestModelMetada <- GetBestModelMetadata(modelsMetadata)
+  if (! is.null(bestModelMetada)) {
+    fit <- fits[[bestModelMetada$id]]
+    loginfo("Execute: building test data")
+    test <- BuildTestData(object)
+    predictionResponse <- PredictModel(object, bestModelMetada, fit, test)
+    prediction <- data.table(id = test[, get(object$params$idColName)],
+                             response = predictionResponse)
+    setnames(prediction, "id", object$params$idColName)
+    setnames(prediction, "response", object$params$responseColName)
+  }
+
+  output <- PredictoROutput(object$params, fits, prediction)
+
   loginfo("Execute: end")
+  return (output)
 }

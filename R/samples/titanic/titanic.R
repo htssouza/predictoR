@@ -37,6 +37,7 @@ basicConfig()
 # Paths
 kTrainFileName <- "R/samples/titanic/train.csv"
 kTestFileName <- "R/samples/titanic/test.csv"
+kSubmissionFileName <- "R/samples/titanic/submission.csv"
 
 # Used on feature engineering
 kTitles <- c("capt", "col", "don", "dr", "major", "master", "miss", "mlle", "mr", "mrs", "rev")
@@ -94,7 +95,6 @@ GetModelsMetadata <- function() {
                        sampleSeed=rep(1994, 7),
                        folds=rep(5, 7),
                        trainFolds=rep(4, 7),
-                       validationFolds=rep(1, 7),
                        model=rep("rpart", 7),
                        method=rep("class", 7),
                        minsplit=c(1, 2, 3, 5, 10, 20, 30))
@@ -145,7 +145,6 @@ GetTrainData <- function(sampleFactor, sampleSeed) {
 
 GetTestData <- function() {
   loginfo("GetTestData: begin")
-  set.seed(sampleSeed)
   y <- fread(kTestFileName)
   y <- PreProcess(y)
   loginfo("GetTestData: end")
@@ -177,6 +176,9 @@ loginfo("Main: creating PredictoR")
 predictoR <- PredictoR(predictoRParams)
 
 loginfo("Main: executing PredictoR")
-Execute(predictoR)
+output <- Execute(predictoR)
+
+loginfo("Main: saving submission")
+write.csv(output$prediction, kSubmissionFileName, row.names=FALSE)
 
 loginfo("Main: end")
