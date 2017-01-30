@@ -84,22 +84,32 @@ GetFeaturesMetadata <- function() {
                                    "sibsp",
                                    "parch",
                                    "fare",
-                                   "embarked",
                                    paste0("cabin.", kCabinLetters),
                                    paste0("title.", kTitles)))
   return (features)
 }
 
 GetModelsMetadata <- function() {
-  models <- data.table(sampleFactor=rep(.5, 7),
-                       sampleSeed=rep(1994, 7),
-                       folds=rep(5, 7),
-                       trainFolds=rep(4, 7),
-                       model=rep("rpart", 7),
-                       method=rep("class", 7),
-                       minsplit=c(1, 2, 3, 5, 10, 20, 30))
+  # individual scenarios
+  sampleFactor <- 1
+  sampleSeed <- 1994
+  folds <- 100
+  trainFolds <- c(25:40)
+  model <- "rpart"
+  method <- "class"
+  minsplit <- 1:30
 
-  return (models)
+  # build all combinations
+  rpartModels <- CJ(sampleFactor, sampleSeed, folds, trainFolds, model, method, minsplit)
+  setnames(rpartModels, "V1", "sampleFactor")
+  setnames(rpartModels, "V2", "sampleSeed")
+  setnames(rpartModels, "V3", "folds")
+  setnames(rpartModels, "V4", "trainFolds")
+  setnames(rpartModels, "V5", "model")
+  setnames(rpartModels, "V6", "method")
+  setnames(rpartModels, "V7", "minsplit")
+
+  return (data.table(rpartModels))
 }
 
 PreProcess <- function(x) {

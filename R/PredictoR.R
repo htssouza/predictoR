@@ -183,6 +183,7 @@ Execute.PredictoR <- function(object) {
     modelMetadata <- modelsMetadata[id == modelMetadataId]
 
     loginfo("Execute: training and evaluating")
+    loginfo(paste0("MODEL: ", modelMetadataId, " / ", nrow(modelsMetadata)))
     loginfo("modelMetadata:")
     loginfo(capture.output(modelMetadata))
 
