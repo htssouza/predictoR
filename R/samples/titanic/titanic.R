@@ -40,7 +40,8 @@ kTestFileName <- "R/samples/titanic/test.csv"
 kSubmissionFileName <- "R/samples/titanic/submission.csv"
 
 # Used on feature engineering
-kTitles <- c("capt", "col", "don", "dr", "major", "master", "miss", "mlle", "mr", "mrs", "rev")
+kTitles <- c("capt", "col", "don", "dr", "major", "master", "miss", "mlle",
+             "mr", "mrs", "rev")
 kCabinLetters <- c("a", "b", "c", "d", "e", "f", "g", "t")
 
 ################################################################################
