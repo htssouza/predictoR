@@ -119,33 +119,27 @@ GetModelsMetadata <- function() {
   sampleFactor <- 1
   sampleSeed <- 1994
   folds <- 100
-  trainFolds <- c(25:40)
-  method <- "class"
+  trainFolds <- c(25:66)
 
   # build all combinations for rpart
-  model <- "rpart"
   minsplit <- 1:30
-  rpartModels <- CJ(sampleFactor, sampleSeed, folds, trainFolds, model, method, minsplit)
-  setnames(rpartModels, "V1", "sampleFactor")
-  setnames(rpartModels, "V2", "sampleSeed")
-  setnames(rpartModels, "V3", "folds")
-  setnames(rpartModels, "V4", "trainFolds")
-  setnames(rpartModels, "V5", "model")
-  setnames(rpartModels, "V6", "method")
-  setnames(rpartModels, "V7", "minsplit")
+  rpartModels <- CJ(sampleFactor=sampleFactor,
+                    sampleSeed=sampleSeed,
+                    folds=folds,
+                    trainFolds=trainFolds,
+                    model="rpart",
+                    method="class",
+                    minsplit=minsplit)
 
   # build all combinations for randomForest
-  model <- "randomForest"
-  trainFolds <- c(70:70)
-  ntree <- ((1:10) * 10)
-  ranfomForestModels <- CJ(sampleFactor, sampleSeed, folds, trainFolds, model, method, ntree)
-  setnames(ranfomForestModels, "V1", "sampleFactor")
-  setnames(ranfomForestModels, "V2", "sampleSeed")
-  setnames(ranfomForestModels, "V3", "folds")
-  setnames(ranfomForestModels, "V4", "trainFolds")
-  setnames(ranfomForestModels, "V5", "model")
-  setnames(ranfomForestModels, "V6", "method")
-  setnames(ranfomForestModels, "V7", "ntree")
+  ntree <- 2:100
+  ranfomForestModels <- CJ(sampleFactor=sampleFactor,
+                           sampleSeed=sampleSeed,
+                           folds=folds,
+                           trainFolds=trainFolds,
+                           model="randomForest",
+                           method="class",
+                           ntree=ntree)
 
   return (rbindlist(list(rpartModels, ranfomForestModels), use.names=TRUE, fill=TRUE))
 }

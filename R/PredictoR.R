@@ -64,22 +64,20 @@ BuildFeatures <- function(object, data) {
   return (data)
 }
 
-BuildTrainValidationData <- function(object, sampleFactor, sampleSeed, folds) {
+BuildTrainValidationData <- function(object, sampleFactor, sampleSeed) {
   loginfo("BuildTrainValidationData: begin")
   loginfo("sampleFactor:")
   loginfo(sampleFactor)
   data <- object$params$getTrainData(sampleFactor = sampleFactor,
                                      sampleSeed = sampleSeed)
-  if (! kFoldColName %in% colnames(data)) {
-    data[, eval(kFoldColName) := ((.I %% folds) + 1)]
-  }
   data <- BuildFeatures(object, data)
   loginfo("BuildTrainValidationData: end")
   return (data)
 }
 
-BuildTrainData <- function(object, data, trainFolds) {
+BuildTrainData <- function(object, data, folds, trainFolds) {
   loginfo("BuildTrainData: begin")
+  data[, eval(kFoldColName) := ((.I %% folds) + 1)]
   data <- data[get(kFoldColName) <= trainFolds]
   loginfo("BuildTrainData: end")
   return (data)
@@ -171,20 +169,28 @@ Execute.PredictoR <- function(object) {
 
     # build data, only if necessary
     needsToBuildData <- FALSE
+    needsToBuildTrainAndValidation <- FALSE
     if (is.null(previousModelMetadata)) {
       needsToBuildData <- TRUE
+      needsToBuildTrainAndValidation <- TRUE
     } else {
       if (previousModelMetadata$sampleFactor != modelMetadata$sampleFactor
-          || previousModelMetadata$sampleSeed != modelMetadata$sampleSeed
-          || previousModelMetadata$folds != modelMetadata$folds
-          || previousModelMetadata$trainFolds != modelMetadata$trainFolds) {
+          || previousModelMetadata$sampleSeed != modelMetadata$sampleSeed) {
             needsToBuildData <- TRUE
+            needsToBuildTrainAndValidation <- TRUE
+      }
+      if (previousModelMetadata$folds != modelMetadata$folds
+          || previousModelMetadata$trainFolds != modelMetadata$trainFolds) {
+            needsToBuildTrainAndValidation <- TRUE
       }
     }
     if (needsToBuildData) {
       loginfo("Execute: needs to rebuild data")
-      data <- BuildTrainValidationData(object, modelMetadata$sampleFactor, modelMetadata$sampleSeed, modelMetadata$folds)
-      train <- BuildTrainData(object, data, modelMetadata$trainFolds)
+      data <- BuildTrainValidationData(object, modelMetadata$sampleFactor, modelMetadata$sampleSeed)
+    }
+    if (needsToBuildTrainAndValidation) {
+      loginfo("Execute: splitting train and validation again")
+      train <- BuildTrainData(object, data, modelMetadata$folds, modelMetadata$trainFolds)
       validation <- BuildValidationData(object, data, modelMetadata$trainFolds)
       gc()
     }

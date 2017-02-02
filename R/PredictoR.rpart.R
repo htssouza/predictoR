@@ -32,7 +32,7 @@ Fit.rpart <- function(object, modelMetadata, data) {
 }
 
 PredictModel.rpart <- function(object, modelMetadata, fit, validation) {
-  loginfo("PredictModel.rpart: end")
+  loginfo("PredictModel.rpart: begin")
   library(rpart)
   y <- predict(fit, validation, type=modelMetadata$method)
   loginfo("PredictModel.rpart: end")
