@@ -19,6 +19,8 @@ library(logging)
 # Local dependencies
 ################################################################################
 
+source ("R/PredictoR.randomForest.R")
+source ("R/PredictoR.rpart.R")
 source ("R/PredictoRParams.R")
 source ("R/PredictoROutput.R")
 
@@ -27,32 +29,6 @@ source ("R/PredictoROutput.R")
 ################################################################################
 
 kFoldColName <- "_fold"
-
-################################################################################
-# Rpart specific Functions
-################################################################################
-
-Fit.rpart <- function(object, modelMetadata, data) {
-  loginfo("Fit.rpart: begin")
-  library(rpart)
-  control <- NULL
-  if (! is.null(modelMetadata$minsplit)) {
-    control <- rpart.control(minsplit=modelMetadata$minsplit)
-  }
-  fit <- rpart(GetFormula(object),
-               data=data,
-               method=modelMetadata$method,
-               control=control)
-  loginfo("Fit.rpart: end")
-  return (fit)
-}
-
-PredictModel.rpart <- function(object, modelMetadata, fit, validation) {
-  loginfo("PredictModel.rpart: end")
-  y <- predict(fit, validation, type=modelMetadata$method)
-  loginfo("PredictModel.rpart: end")
-  return (y)
-}
 
 ################################################################################
 # Functions
@@ -133,7 +109,10 @@ GetFormula <- function(object) {
 
 Fit <- function(object, modelMetadata, data) {
   loginfo("Fit: begin")
-  if (modelMetadata$model == "rpart") {
+  if (modelMetadata$model == "randomForest") {
+    return (Fit.randomForest(object, modelMetadata, data))
+  }
+  else if (modelMetadata$model == "rpart") {
     return (Fit.rpart(object, modelMetadata, data))
   }
   loginfo("Fit: end")
@@ -142,7 +121,10 @@ Fit <- function(object, modelMetadata, data) {
 
 PredictModel <- function(object, modelMetadata, fit, validation) {
   loginfo("PredictModel: begin")
-  if (modelMetadata$model == "rpart") {
+  if (modelMetadata$model == "randomForest") {
+    return (PredictModel.randomForest(object, modelMetadata, fit, validation))
+  }
+  else if (modelMetadata$model == "rpart") {
     return (PredictModel.rpart(object, modelMetadata, fit, validation))
   }
   loginfo("PredictModel: end")

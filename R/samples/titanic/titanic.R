@@ -74,6 +74,29 @@ BuildFeature.data.table <- function(x, feature) {
     y <- ifelse(grepl(cabinLetter, x[, cabin], ignore.case=TRUE), 1, 0)
   }
 
+  if (feature == "age2") {
+    # fill missing ages using title than global mean
+    y <- x[, age]
+    for(title in paste0("title.", kTitles)) {
+      y[ is.na(y) & x[, get(title) == 1]] <- mean( x[ get(title) == 1 & !is.na(age), age] )
+    }
+    # global
+    y[ is.na(y) ] <- mean( x[ !is.na(age), age] )
+  }
+
+  if (feature == "lastnamecount") {
+    # last name family count
+    nameTokens <- strsplit(x[, name], ", ")
+    lastname <- sapply(nameTokens, FUN=function(a) { stri_trim(a[1]) })
+    lastnametbl <- data.table(lastname = lastname)
+    lastnamecount <- lastnametbl[, list(lastnamecount=.N), by=lastname]
+    tmp <- merge(x=lastnametbl[, list(lastname)],
+                 y=lastnamecount,
+                 by.x="lastname",
+                 by.y="lastname")
+    y <- tmp[, lastnamecount]
+  }
+
   loginfo("BuildFeature: end")
   return (y)
 }
@@ -81,12 +104,13 @@ BuildFeature.data.table <- function(x, feature) {
 GetFeaturesMetadata <- function() {
   features <- data.table(feature=c("pclass",
                                    "sex",
-                                   "age",
                                    "sibsp",
                                    "parch",
                                    "fare",
                                    paste0("cabin.", kCabinLetters),
-                                   paste0("title.", kTitles)))
+                                   paste0("title.", kTitles),
+                                   "age2",
+                                   "lastnamecount"))
   return (features)
 }
 
@@ -96,11 +120,11 @@ GetModelsMetadata <- function() {
   sampleSeed <- 1994
   folds <- 100
   trainFolds <- c(25:40)
-  model <- "rpart"
   method <- "class"
-  minsplit <- 1:30
 
-  # build all combinations
+  # build all combinations for rpart
+  model <- "rpart"
+  minsplit <- 1:30
   rpartModels <- CJ(sampleFactor, sampleSeed, folds, trainFolds, model, method, minsplit)
   setnames(rpartModels, "V1", "sampleFactor")
   setnames(rpartModels, "V2", "sampleSeed")
@@ -110,11 +134,23 @@ GetModelsMetadata <- function() {
   setnames(rpartModels, "V6", "method")
   setnames(rpartModels, "V7", "minsplit")
 
-  return (data.table(rpartModels))
+  # build all combinations for randomForest
+  model <- "randomForest"
+  trainFolds <- c(70:70)
+  ntree <- ((1:10) * 10)
+  ranfomForestModels <- CJ(sampleFactor, sampleSeed, folds, trainFolds, model, method, ntree)
+  setnames(ranfomForestModels, "V1", "sampleFactor")
+  setnames(ranfomForestModels, "V2", "sampleSeed")
+  setnames(ranfomForestModels, "V3", "folds")
+  setnames(ranfomForestModels, "V4", "trainFolds")
+  setnames(ranfomForestModels, "V5", "model")
+  setnames(ranfomForestModels, "V6", "method")
+  setnames(ranfomForestModels, "V7", "ntree")
+
+  return (rbindlist(list(rpartModels, ranfomForestModels), use.names=TRUE, fill=TRUE))
 }
 
 PreProcess <- function(x) {
-
   # convert to data.table if needed
   if (! is(x, "data.table")) {
     x <- data.table(x)
@@ -138,6 +174,13 @@ PreProcess <- function(x) {
   }
   for(colName in colsToConvert) {
     x[, eval(colName) := tolower(get(colName))]
+  }
+
+  # factorization
+  x[, embarked := as.factor(embarked) ]
+  x[, sex := as.factor(sex) ]
+  if ("survived" %in% colnames(x)) {
+    x[, survived := as.factor(survived) ]
   }
 
   return (x)
@@ -190,6 +233,7 @@ loginfo("Main: executing PredictoR")
 output <- Execute(predictoR)
 
 loginfo("Main: saving submission")
+output$prediction[is.na(survived), survived := as.factor(0) ]
 write.csv(output$prediction, kSubmissionFileName, row.names=FALSE)
 
 loginfo("Main: end")
