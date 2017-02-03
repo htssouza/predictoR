@@ -119,10 +119,10 @@ GetModelsMetadata <- function() {
   sampleFactor <- 1
   sampleSeed <- 1994
   folds <- 100
-  trainFolds <- c(25:66)
+  trainFolds <- c(25:75)
 
   # build all combinations for rpart
-  minsplit <- 1:30
+  minsplit <- 1:50
   rpartModels <- CJ(sampleFactor=sampleFactor,
                     sampleSeed=sampleSeed,
                     folds=folds,
@@ -132,7 +132,7 @@ GetModelsMetadata <- function() {
                     minsplit=minsplit)
 
   # build all combinations for randomForest
-  ntree <- 2:100
+  ntree <- 2:200
   ranfomForestModels <- CJ(sampleFactor=sampleFactor,
                            sampleSeed=sampleSeed,
                            folds=folds,
