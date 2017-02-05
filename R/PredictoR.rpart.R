@@ -28,10 +28,10 @@ Predictor.Fit.rpart <- function(object, modelMetadata, data) {
   return (fit)
 }
 
-Predictor.PredictModel.rpart <- function(object, modelMetadata, fit, validation) {
+Predictor.PredictModel.rpart <- function(object, modelMetadata, fit, data) {
   loginfo("Predictor.PredictModel.rpart: begin")
   library(rpart)
-  y <- predict(fit, validation, type=modelMetadata$method)
+  y <- predict(fit, data, type=modelMetadata$method)
   loginfo("Predictor.PredictModel.rpart: end")
   return (y)
 }

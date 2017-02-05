@@ -24,10 +24,10 @@ Predictor.Fit.randomForest <- function(object, modelMetadata, data) {
   return (fit)
 }
 
-Predictor.PredictModel.randomForest <- function(object, modelMetadata, fit, validation) {
+Predictor.PredictModel.randomForest <- function(object, modelMetadata, fit, data) {
   loginfo("Predictor.PredictModel.randomForest: begin")
   library(randomForest)
-  y <- predict(fit, validation, type=modelMetadata$method)
+  y <- predict(fit, data, type=modelMetadata$method)
   loginfo("Predictor.PredictModel.randomForest: end")
   return (y)
 }
