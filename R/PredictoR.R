@@ -141,8 +141,6 @@ BuildFeatures.PredictoR <- function(object, data) {
 Execute <- function(x, ...) UseMethod("Execute")
 Execute.PredictoR <- function(object) {
   loginfo("Predictor.Execute: begin")
-  loginfo("str(object$params$modelsMetadata):")
-  loginfo(str(object$params$modelsMetadata))
 
   # fits
   fits <- list()

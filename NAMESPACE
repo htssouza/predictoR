@@ -1,3 +1,7 @@
+# Exports
+import(data.table)
+import(logging)
+
 # PredictoRParams
 S3method(PredictoRParams, default)
 S3method(print, PredictoRParams)
