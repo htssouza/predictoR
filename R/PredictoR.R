@@ -124,7 +124,7 @@ print.PredictoR <- function(object) {
 BuildFeatures <- function(x, ...) UseMethod("BuildFeatures")
 
 BuildFeatures.PredictoR <- function(object, data) {
-  loginfo("BuildFeatures: begin")
+  loginfo("Predictor.BuildFeatures: begin")
   for(feature in object$params$featuresMetadata[, feature]) {
     if (! feature %in% colnames(data)) {
       featureData <- object$params$buildFeature(data, feature)
@@ -134,13 +134,13 @@ BuildFeatures.PredictoR <- function(object, data) {
       }
     }
   }
-  loginfo("BuildFeatures: end")
+  loginfo("Predictor.BuildFeatures: end")
   return (data)
 }
 
 Execute <- function(x, ...) UseMethod("Execute")
 Execute.PredictoR <- function(object) {
-  loginfo("Execute: begin")
+  loginfo("Predictor.Execute: begin")
 
   # fits
   fits <- list()
@@ -162,7 +162,7 @@ Execute.PredictoR <- function(object) {
   for(modelMetadataId in (modelsMetadata[, id])) {
     modelMetadata <- modelsMetadata[id == modelMetadataId]
 
-    loginfo("Execute: training and evaluating")
+    loginfo("Predictor.Execute: training and evaluating")
     loginfo(paste0("MODEL: ", modelMetadataId, " / ", nrow(modelsMetadata)))
     loginfo("modelMetadata:")
     loginfo(capture.output(modelMetadata))
@@ -185,11 +185,11 @@ Execute.PredictoR <- function(object) {
       }
     }
     if (needsToBuildData) {
-      loginfo("Execute: needs to rebuild data")
+      loginfo("Predictor.Execute: needs to rebuild data")
       data <- Predictor.BuildTrainValidationData(object, modelMetadata$sampleFactor, modelMetadata$sampleSeed)
     }
     if (needsToBuildTrainAndValidation) {
-      loginfo("Execute: splitting train and validation again")
+      loginfo("Predictor.Execute: splitting train and validation")
       train <- Predictor.BuildTrainData(object, data, modelMetadata$folds, modelMetadata$trainFolds)
       validation <- Predictor.BuildValidationData(object, data, modelMetadata$trainFolds)
       gc()
@@ -201,9 +201,9 @@ Execute.PredictoR <- function(object) {
     fits[[modelMetadataId]] <- fit
 
     # validate&evaluate
-    loginfo("Execute: validation prediction")
+    loginfo("Predictor.Execute: validation prediction")
     validationResponse <- Predictor.PredictModel(object, modelMetadata, fit, validation)
-    loginfo("Execute: evaluation")
+    loginfo("Predictor.Execute: evaluation")
     validationScore <- object$params$evaluate(validationResponse, validation[, get(object$params$responseColName)])
     loginfo("score:")
     loginfo(capture.output(validationScore))
@@ -217,7 +217,7 @@ Execute.PredictoR <- function(object) {
   bestModelMetada <- Predictor.GetBestModelMetadata(modelsMetadata)
   if (! is.null(bestModelMetada)) {
     fit <- fits[[bestModelMetada$id]]
-    loginfo("Execute: building test data")
+    loginfo("Predictor.Execute: building test data")
     test <- Predictor.BuildTestData(object)
     predictionResponse <- Predictor.PredictModel(object, bestModelMetada, fit, test)
     prediction <- data.table(id = test[, get(object$params$idColName)],
@@ -228,6 +228,6 @@ Execute.PredictoR <- function(object) {
 
   output <- PredictoROutput(object$params, fits, prediction)
 
-  loginfo("Execute: end")
+  loginfo("Predictor.Execute: end")
   return (output)
 }
