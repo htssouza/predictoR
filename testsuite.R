@@ -8,12 +8,6 @@
 # External dependencies
 ################################################################################
 
-for (.requirement in c("logging", "RUnit")) {
-  if (! .requirement %in% rownames(installed.packages())) {
-    install.packages(.requirement, repos="http://cran.rstudio.com/")
-  }
-}
-
 library(logging)
 library(RUnit)
 

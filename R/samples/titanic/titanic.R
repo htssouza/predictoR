@@ -8,12 +8,6 @@
 # External dependencies
 ################################################################################
 
-for (.requirement in c("data.table", "logging", "stringi")) {
-  if (! .requirement %in% rownames(installed.packages())) {
-    install.packages(.requirement, repos="http://cran.rstudio.com/")
-  }
-}
-
 library(data.table)
 library(logging)
 library(stringi)
@@ -122,7 +116,7 @@ GetModelsMetadata <- function() {
   trainFolds <- c(25:75)
 
   # build all combinations for rpart
-  minsplit <- 1:50
+  minsplit <- 30
   rpartModels <- CJ(sampleFactor=sampleFactor,
                     sampleSeed=sampleSeed,
                     folds=folds,
@@ -132,7 +126,7 @@ GetModelsMetadata <- function() {
                     minsplit=minsplit)
 
   # build all combinations for randomForest
-  ntree <- 2:200
+  ntree <- 30
   ranfomForestModels <- CJ(sampleFactor=sampleFactor,
                            sampleSeed=sampleSeed,
                            folds=folds,

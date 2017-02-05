@@ -6,35 +6,32 @@
 # External dependencies
 ################################################################################
 
-for (.requirement in c("rpart")) {
-  if (! .requirement %in% rownames(installed.packages())) {
-    install.packages(.requirement, repos="http://cran.rstudio.com/")
-  }
-}
+library(data.table)
+library(logging)
 
 ################################################################################
 # Functions
 ################################################################################
 
-Fit.rpart <- function(object, modelMetadata, data) {
-  loginfo("Fit.rpart: begin")
+Predictor.Fit.rpart <- function(object, modelMetadata, data) {
+  loginfo("Predictor.Fit.rpart: begin")
   library(rpart)
   control <- NULL
   if (! is.null(modelMetadata$minsplit)) {
     control <- rpart.control(minsplit=modelMetadata$minsplit)
   }
-  fit <- rpart(GetFormula(object),
+  fit <- rpart(Predictor.GetFormula(object),
                data=data,
                method=modelMetadata$method,
                control=control)
-  loginfo("Fit.rpart: end")
+  loginfo("Predictor.Fit.rpart: end")
   return (fit)
 }
 
-PredictModel.rpart <- function(object, modelMetadata, fit, validation) {
-  loginfo("PredictModel.rpart: begin")
+Predictor.PredictModel.rpart <- function(object, modelMetadata, fit, validation) {
+  loginfo("Predictor.PredictModel.rpart: begin")
   library(rpart)
   y <- predict(fit, validation, type=modelMetadata$method)
-  loginfo("PredictModel.rpart: end")
+  loginfo("Predictor.PredictModel.rpart: end")
   return (y)
 }

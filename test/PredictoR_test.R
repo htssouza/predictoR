@@ -6,12 +6,6 @@
 # External dependencies
 ################################################################################
 
-for (.requirement in c("data.table", "RUnit")) {
-  if (! .requirement %in% rownames(installed.packages())) {
-    install.packages(.requirement, repos="http://cran.rstudio.com/")
-  }
-}
-
 library(data.table)
 library(RUnit)
 
@@ -19,8 +13,7 @@ library(RUnit)
 # Local dependencies
 ################################################################################
 
-source ("R/PredictoR.R")
-source ("test/PredictoRParams_test.R")
+library(predictoR)
 
 ################################################################################
 # Tests

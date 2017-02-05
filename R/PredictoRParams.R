@@ -6,12 +6,6 @@
 # External dependencies
 ################################################################################
 
-for (.requirement in c("data.table", "logging")) {
-  if (! .requirement %in% rownames(installed.packages())) {
-    install.packages(.requirement, repos="http://cran.rstudio.com/")
-  }
-}
-
 library(data.table)
 library(logging)
 

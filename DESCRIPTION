@@ -1,0 +1,20 @@
+Package: predictoR
+Title: General purpose predictor using different models.
+Version: 0.1
+Date: 2017-02-05
+Author: Henrique Souza
+Maintainer: Henrique Souza <htssouza@gmail.com>
+Description: This is a general predictor that can run multiple models at once.
+License: Apache-2 | file LICENSE
+Depends:
+    R (>= 3.1)
+Imports:
+    data.table,
+    logging,
+    RUnit
+Suggests:
+    devtools,
+    randomForest,
+    rpart,
+    stringi,
+    xgboost

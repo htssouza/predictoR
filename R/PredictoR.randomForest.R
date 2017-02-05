@@ -6,35 +6,28 @@
 # External dependencies
 ################################################################################
 
-for (.requirement in c("randomForest")) {
-  if (! .requirement %in% rownames(installed.packages())) {
-    install.packages(.requirement, repos="http://cran.rstudio.com/")
-  }
-}
-
 library(data.table)
 library(logging)
-library(randomForest)
 
 ################################################################################
 # Functions
 ################################################################################
 
-Fit.randomForest <- function(object, modelMetadata, data) {
-  loginfo("Fit.randomForest: begin")
+Predictor.Fit.randomForest <- function(object, modelMetadata, data) {
+  loginfo("Predictor.Fit.randomForest: begin")
   library(randomForest)
-  fit <- randomForest(GetFormula(object),
+  fit <- randomForest(Predictor.GetFormula(object),
                data=data,
                method=modelMetadata$method,
                ntree=modelMetadata$ntree)
-  loginfo("Fit.randomForest: end")
+  loginfo("Predictor.Fit.randomForest: end")
   return (fit)
 }
 
-PredictModel.randomForest <- function(object, modelMetadata, fit, validation) {
-  loginfo("PredictModel.randomForest: end")
+Predictor.PredictModel.randomForest <- function(object, modelMetadata, fit, validation) {
+  loginfo("Predictor.PredictModel.randomForest: end")
   library(randomForest)
   y <- predict(fit, validation, type=modelMetadata$method)
-  loginfo("PredictModel.randomForest: end")
+  loginfo("Predictor.PredictModel.randomForest: end")
   return (y)
 }
