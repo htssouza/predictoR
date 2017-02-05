@@ -25,7 +25,7 @@ Predictor.Fit.randomForest <- function(object, modelMetadata, data) {
 }
 
 Predictor.PredictModel.randomForest <- function(object, modelMetadata, fit, validation) {
-  loginfo("Predictor.PredictModel.randomForest: end")
+  loginfo("Predictor.PredictModel.randomForest: begin")
   library(randomForest)
   y <- predict(fit, validation, type=modelMetadata$method)
   loginfo("Predictor.PredictModel.randomForest: end")
