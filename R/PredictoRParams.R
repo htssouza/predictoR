@@ -67,8 +67,8 @@ PredictoRParams.default <- function(idColName,
   this <- list()
   this$idColName <- idColName
   this$responseColName <- responseColName
-  this$featuresMetadata <- featuresMetadata
-  this$modelsMetadata <- modelsMetadata
+  this$featuresMetadata <- data.table(featuresMetadata)
+  this$modelsMetadata <- data.table(modelsMetadata)
   this$buildFeature <- buildFeature
   this$getTrainData <- getTrainData
   this$getTestData <- getTestData

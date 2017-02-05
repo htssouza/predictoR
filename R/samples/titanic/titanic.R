@@ -8,15 +8,23 @@
 # External dependencies
 ################################################################################
 
+for (.requirement in c("data.table", "devtools", "logging", "stringi")) {
+  if (! .requirement %in% rownames(installed.packages())) {
+    install.packages(.requirement, repos="http://cran.rstudio.com/")
+  }
+}
+
+for (.requirement in c("predictoR")) {
+  if (! .requirement %in% rownames(installed.packages())) {
+    library(devtools)
+    install_github("htssouza/predictoR")
+  }
+}
+
 library(data.table)
 library(logging)
+library(predictoR)
 library(stringi)
-
-################################################################################
-# Local dependencies
-################################################################################
-
-source ("R/PredictoR.R")
 
 ################################################################################
 # Logging configuration
