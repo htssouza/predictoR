@@ -1,0 +1,16 @@
+# PredictoRParams
+S3method("PredictoRParams", default)
+S3method("print", PredictoRParams)
+
+# PredictoROutput
+S3method("PredictoROutput", PredictoRParams)
+S3method("print", PredictoROutput)
+
+# PredictoR
+S3method("PredictoR", default)
+S3method("PredictoR", PredictoRParams)
+S3method("print", PredictoR)
+S3method("BuildFeatures", default)
+S3method("BuildFeatures", PredictoR)
+S3method("Execute", default)
+S3method("Execute", PredictoR)
