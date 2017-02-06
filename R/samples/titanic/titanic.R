@@ -142,14 +142,14 @@ GetModelsMetadata <- function() {
                            ntree=ntree)
 
    # build all combinations for xgboost
-   nround <- ((1:10)*10)
+   nrounds <- ((1:10)*10)
    xgboostModels <- CJ(sampleFactor=sampleFactor,
                             sampleSeed=sampleSeed,
                             folds=folds,
                             trainFolds=trainFolds,
                             model="xgboost",
                             objective="binary:logistic",
-                            nround=nround)
+                            nrounds=nrounds)
 
   return (rbindlist(list(rpartModels,
                          ranfomForestModels,

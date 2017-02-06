@@ -41,9 +41,16 @@ PredictoR.BuildXGBData <- function(x, object, withLabel) {
 Predictor.Fit.xgboost <- function(object, modelMetadata, dataWithLabel) {
   loginfo("Predictor.Fit.xgboost: begin")
   library(xgboost)
-  fit <- xgboost(dataWithLabel,
-                 objective=modelMetadata$objective,
-                 nround=modelMetadata$nround)
+  if (! is.null(modelMetadata$num_class)) {
+    fit <- xgboost(dataWithLabel,
+                   objective=modelMetadata$objective,
+                   nrounds=modelMetadata$nrounds,
+                   num_class=modelMetadata$num_class)
+  } else {
+    fit <- xgboost(dataWithLabel,
+                   objective=modelMetadata$objective,
+                   nrounds=modelMetadata$nrounds)
+  }
   loginfo("Predictor.Fit.xgboost: end")
   return (fit)
 }
