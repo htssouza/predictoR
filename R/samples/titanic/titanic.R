@@ -14,17 +14,15 @@ for (.requirement in c("data.table", "devtools", "logging", "stringi")) {
   }
 }
 
-for (.requirement in c("predictoR")) {
-  if (! .requirement %in% rownames(installed.packages())) {
-    library(devtools)
-    install_github("htssouza/predictoR")
-  }
-}
-
 library(data.table)
 library(logging)
-library(predictoR)
 library(stringi)
+
+################################################################################
+# Local dependencies
+################################################################################
+
+source("R/PredictoR.R")
 
 ################################################################################
 # Logging configuration
@@ -124,7 +122,7 @@ GetModelsMetadata <- function() {
   trainFolds <- c(25:75)
 
   # build all combinations for rpart
-  minsplit <- 30
+  minsplit <- ((1:10)*10)
   rpartModels <- CJ(sampleFactor=sampleFactor,
                     sampleSeed=sampleSeed,
                     folds=folds,
@@ -134,7 +132,7 @@ GetModelsMetadata <- function() {
                     minsplit=minsplit)
 
   # build all combinations for randomForest
-  ntree <- 30
+  ntree <- ((1:10)*10)
   ranfomForestModels <- CJ(sampleFactor=sampleFactor,
                            sampleSeed=sampleSeed,
                            folds=folds,
@@ -143,7 +141,19 @@ GetModelsMetadata <- function() {
                            method="class",
                            ntree=ntree)
 
-  return (rbindlist(list(rpartModels, ranfomForestModels), use.names=TRUE, fill=TRUE))
+   # build all combinations for xgboost
+   nround <- ((1:10)*10)
+   xgboostModels <- CJ(sampleFactor=sampleFactor,
+                            sampleSeed=sampleSeed,
+                            folds=folds,
+                            trainFolds=trainFolds,
+                            model="xgboost",
+                            objective="binary:logistic",
+                            nround=nround)
+
+  return (rbindlist(list(rpartModels,
+                         ranfomForestModels,
+                         xgboostModels), use.names=TRUE, fill=TRUE))
 }
 
 PreProcess <- function(x) {
@@ -201,6 +211,17 @@ GetTestData <- function() {
   return (y)
 }
 
+NormalizeResponse <- function(response) {
+  if (is.factor(response)) {
+    response[is.na(response)] <- as.factor(0)
+  } else {
+    response[response < .5 ] <- 0
+    response[response >= .5 ] <- 1
+    response <- as.factor(response)
+  }
+  return (response)
+}
+
 Evaluate <- function(prediction, expected) {
   return (length(expected[prediction == expected]) / length(expected))
 }
@@ -219,7 +240,8 @@ predictoRParams <- PredictoRParams(idColName="passengerid",
                                    buildFeature=BuildFeature,
                                    getTrainData=GetTrainData,
                                    getTestData=GetTestData,
-                                   evaluate=Evaluate)
+                                   evaluate=Evaluate,
+                                   normalizeResponse=NormalizeResponse)
 loginfo(capture.output(predictoRParams))
 
 loginfo("Main: creating PredictoR")
@@ -229,7 +251,6 @@ loginfo("Main: executing PredictoR")
 output <- Execute(predictoR)
 
 loginfo("Main: saving submission")
-output$prediction[is.na(survived), survived := as.factor(0) ]
 write.csv(output$prediction, kSubmissionFileName, row.names=FALSE)
 
 loginfo("Main: end")

@@ -13,7 +13,7 @@ library(RUnit)
 # Local dependencies
 ################################################################################
 
-library(predictoR)
+source("R/PredictoR.R")
 source("test/PredictoRParams_test.R")
 
 ################################################################################

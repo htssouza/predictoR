@@ -48,6 +48,9 @@ library(logging)
 #   evaluate(prediction, expected)
 #     return validation score (better the higher)
 #
+#   normalizeResponse(response)
+#     return normalizedResponse
+#
 ################################################################################
 
 ################################################################################
@@ -63,7 +66,8 @@ PredictoRParams.default <- function(idColName,
                                     buildFeature,
                                     getTrainData,
                                     getTestData,
-                                    evaluate) {
+                                    evaluate,
+                                    normalizeResponse=NULL) {
   this <- list()
   this$idColName <- idColName
   this$responseColName <- responseColName
@@ -73,6 +77,7 @@ PredictoRParams.default <- function(idColName,
   this$getTrainData <- getTrainData
   this$getTestData <- getTestData
   this$evaluate <- evaluate
+  this$normalizeResponse <- normalizeResponse
   class(this) <- "PredictoRParams"
   return (this)
 }

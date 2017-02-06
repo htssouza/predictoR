@@ -15,6 +15,7 @@ library(logging)
 
 source ("R/PredictoR.randomForest.R")
 source ("R/PredictoR.rpart.R")
+source ("R/PredictoR.xgboost.R")
 source ("R/PredictoRParams.R")
 source ("R/PredictoROutput.R")
 
@@ -73,21 +74,23 @@ Predictor.Fit <- function(object, modelMetadata, data) {
   loginfo("Predictor.Fit: begin")
   if (modelMetadata$model == "randomForest") {
     return (Predictor.Fit.randomForest(object, modelMetadata, data))
-  }
-  else if (modelMetadata$model == "rpart") {
+  } else if (modelMetadata$model == "rpart") {
     return (Predictor.Fit.rpart(object, modelMetadata, data))
+  } else if (modelMetadata$model == "xgboost") {
+    return (Predictor.Fit.xgboost(object, modelMetadata, data))
   }
   loginfo("Predictor.Fit: end")
   return (NULL)
 }
 
-Predictor.PredictModel <- function(object, modelMetadata, fit, validation) {
+Predictor.PredictModel <- function(object, modelMetadata, fit, data) {
   loginfo("Predictor.PredictModel: begin")
   if (modelMetadata$model == "randomForest") {
-    return (Predictor.PredictModel.randomForest(object, modelMetadata, fit, validation))
-  }
-  else if (modelMetadata$model == "rpart") {
-    return (Predictor.PredictModel.rpart(object, modelMetadata, fit, validation))
+    return (Predictor.PredictModel.randomForest(object, modelMetadata, fit, data))
+  } else if (modelMetadata$model == "rpart") {
+    return (Predictor.PredictModel.rpart(object, modelMetadata, fit, data))
+  } else if (modelMetadata$model == "xgboost") {
+    return (Predictor.PredictModel.xgboost(object, modelMetadata, fit, data))
   }
   loginfo("Predictor.PredictModel: end")
   return (NULL)
@@ -191,18 +194,37 @@ Execute.PredictoR <- function(object) {
     if (needsToBuildTrainAndValidation) {
       loginfo("Predictor.Execute: splitting train and validation")
       train <- Predictor.BuildTrainData(object, data, modelMetadata$folds, modelMetadata$trainFolds)
+      train.xgboost <- NULL
       validation <- Predictor.BuildValidationData(object, data, modelMetadata$trainFolds)
+      validation.xgboost <- NULL
       gc()
     }
 
     # train
     loginfo("Execute: fitting")
-    fit <- Predictor.Fit(object, modelMetadata, train)
+    if (modelMetadata$model == "xgboost") {
+      if (is.null(train.xgboost)) {
+        train.xgboost <- PredictoR.BuildXGBData(train, object, withLabel=TRUE)
+      }
+      fit <- Predictor.Fit(object, modelMetadata, train.xgboost)
+    } else {
+      fit <- Predictor.Fit(object, modelMetadata, train)
+    }
     fits[[modelMetadataId]] <- fit
 
     # validate&evaluate
     loginfo("Predictor.Execute: validation prediction")
-    validationResponse <- Predictor.PredictModel(object, modelMetadata, fit, validation)
+    if (modelMetadata$model == "xgboost") {
+      if (is.null(validation.xgboost)) {
+        validation.xgboost <- PredictoR.BuildXGBData(validation, object, withLabel=FALSE)
+      }
+      validationResponse <- Predictor.PredictModel(object, modelMetadata, fit, validation.xgboost)
+    } else {
+      validationResponse <- Predictor.PredictModel(object, modelMetadata, fit, validation)
+    }
+    if (! is.null(object$params$normalizeResponse)) {
+      validationResponse <- object$params$normalizeResponse(validationResponse)
+    }
     loginfo("Predictor.Execute: evaluation")
     validationScore <- object$params$evaluate(validationResponse, validation[, get(object$params$responseColName)])
     loginfo("score:")
@@ -219,7 +241,16 @@ Execute.PredictoR <- function(object) {
     fit <- fits[[bestModelMetada$id]]
     loginfo("Predictor.Execute: building test data")
     test <- Predictor.BuildTestData(object)
-    predictionResponse <- Predictor.PredictModel(object, bestModelMetada, fit, test)
+    if (bestModelMetada$model == "xgboost") {
+      test.xgboost <- PredictoR.BuildXGBData(test, object, withLabel=FALSE)
+      predictionResponse <- Predictor.PredictModel(object, bestModelMetada, fit, test.xgboost)
+    } else {
+      predictionResponse <- Predictor.PredictModel(object, bestModelMetada, fit, test)
+    }
+    if (! is.null(object$params$normalizeResponse)) {
+      predictionResponse <- object$params$normalizeResponse(predictionResponse)
+    }
+
     prediction <- data.table(id = test[, get(object$params$idColName)],
                              response = predictionResponse)
     setnames(prediction, "id", object$params$idColName)
