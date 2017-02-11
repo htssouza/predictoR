@@ -15,14 +15,13 @@ for (.requirement in c("data.table", "devtools", "logging", "stringi")) {
 }
 
 library(data.table)
+library(devtools)
 library(logging)
 library(stringi)
 
-################################################################################
-# Local dependencies
-################################################################################
-
-source("R/PredictoR.R")
+# keep it updated
+install_github("htssouza/predictoR")
+library(predictoR)
 
 ################################################################################
 # Logging configuration
@@ -97,6 +96,10 @@ BuildFeature.data.table <- function(x, feature) {
     y <- tmp[, lastnamecount]
   }
 
+  if (feature == "familysize") {
+    y <- x[, (sibsp + parch + 1)]
+  }
+
   loginfo("BuildFeature: end")
   return (y)
 }
@@ -104,13 +107,12 @@ BuildFeature.data.table <- function(x, feature) {
 GetFeaturesMetadata <- function() {
   features <- data.table(feature=c("pclass",
                                    "sex",
-                                   "sibsp",
-                                   "parch",
                                    "fare",
                                    paste0("cabin.", kCabinLetters),
                                    paste0("title.", kTitles),
                                    "age2",
-                                   "lastnamecount"))
+                                   "lastnamecount",
+                                   "familysize"))
   return (features)
 }
 
@@ -119,7 +121,7 @@ GetModelsMetadata <- function() {
   sampleFactor <- 1
   sampleSeed <- 1994
   folds <- 100
-  trainFolds <- c(25:75)
+  trainFolds <- c(33:66)
 
   # build all combinations for rpart
   minsplit <- ((1:10)*10)
@@ -132,7 +134,7 @@ GetModelsMetadata <- function() {
                     minsplit=minsplit)
 
   # build all combinations for randomForest
-  ntree <- ((1:10)*10)
+  ntree <- 33:66
   ranfomForestModels <- CJ(sampleFactor=sampleFactor,
                            sampleSeed=sampleSeed,
                            folds=folds,
@@ -195,7 +197,7 @@ PreProcess <- function(x) {
 GetTrainData <- function(sampleFactor, sampleSeed) {
   set.seed(sampleSeed)
   loginfo("GetTrainData: begin")
-  y <- fread(kTrainFileName)
+  y <- fread(kTrainFileName, showProgress=TRUE)
   y <- PreProcess(y)
   sampleSize <- as.integer(nrow(y) * sampleFactor)
   y <- y[][][sample(.N, sampleSize)]
@@ -205,7 +207,7 @@ GetTrainData <- function(sampleFactor, sampleSeed) {
 
 GetTestData <- function() {
   loginfo("GetTestData: begin")
-  y <- fread(kTestFileName)
+  y <- fread(kTestFileName, showProgress=TRUE)
   y <- PreProcess(y)
   loginfo("GetTestData: end")
   return (y)
