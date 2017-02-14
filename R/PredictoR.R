@@ -75,19 +75,6 @@ PredictoR.Fit <- function(object, modelMetadata, data) {
   return (NULL)
 }
 
-PredictoR.PredictModel <- function(object, modelMetadata, fit, data) {
-  loginfo("PredictoR.PredictModel: begin")
-  if (modelMetadata$model == "randomForest") {
-    return (PredictoR.PredictModel.randomForest(object, modelMetadata, fit, data))
-  } else if (modelMetadata$model == "rpart") {
-    return (PredictoR.PredictModel.rpart(object, modelMetadata, fit, data))
-  } else if (modelMetadata$model == "xgboost") {
-    return (PredictoR.PredictModel.xgboost(object, modelMetadata, fit, data))
-  }
-  loginfo("PredictoR.PredictModel: end")
-  return (NULL)
-}
-
 PredictoR.GetBestModelMetadata <- function (modelsMetadata) {
   sortedOutputs <- modelsMetadata[order(-score)]
   best <- sortedOutputs[1]
@@ -137,12 +124,27 @@ BuildTestData <- function(x, ...) UseMethod("BuildTestData")
 
 BuildTestData.PredictoR <- function(object) {
   loginfo("PredictoR.BuildTestData: begin")
-  if (! ("testData" %in% object)) {
+  if (! ("testDxata" %in% object)) {
     object$testData <- data.table(object$params$getTestData())
     object$testData <- BuildFeatures(object, object$testData)
   }
   loginfo("PredictoR.BuildTestData: end")
   return (object$testData)
+}
+
+PredictModel <- function(x, ...) UseMethod("PredictModel")
+
+PredictModel.PredictoR <- function(object, modelMetadata, fit, data) {
+  loginfo("PredictoR.PredictModel: begin")
+  if (modelMetadata$model == "randomForest") {
+    return (PredictoR.PredictModel.randomForest(object, modelMetadata, fit, data))
+  } else if (modelMetadata$model == "rpart") {
+    return (PredictoR.PredictModel.rpart(object, modelMetadata, fit, data))
+  } else if (modelMetadata$model == "xgboost") {
+    return (PredictoR.PredictModel.xgboost(object, modelMetadata, fit, data))
+  }
+  loginfo("PredictoR.PredictModel: end")
+  return (NULL)
 }
 
 Execute <- function(x, ...) UseMethod("Execute")
@@ -222,9 +224,9 @@ Execute.PredictoR <- function(object) {
       if (is.null(validation.xgboost)) {
         validation.xgboost <- PredictoR.BuildXGBData(validation, object, withLabel=FALSE)
       }
-      validationResponse <- PredictoR.PredictModel(object, modelMetadata, fit, validation.xgboost)
+      validationResponse <- PredictModel(object, modelMetadata, fit, validation.xgboost)
     } else {
-      validationResponse <- PredictoR.PredictModel(object, modelMetadata, fit, validation)
+      validationResponse <- PredictModel(object, modelMetadata, fit, validation)
     }
     if (! is.null(object$params$normalizeResponse)) {
       validationResponse <- object$params$normalizeResponse(validationResponse)

@@ -58,6 +58,9 @@ PredictoR.Fit.xgboost <- function(object, modelMetadata, dataWithLabel) {
 PredictoR.PredictModel.xgboost <- function(object, modelMetadata, fit, dataWithoutLabel) {
   loginfo("PredictoR.PredictModel.xgboost: begin")
   library(xgboost)
+  if (! ("xgb.DMatrix" %in% class(dataWithoutLabel))) {
+    dataWithoutLabel <- PredictoR.BuildXGBData(dataWithoutLabel, object, FALSE) 
+  }
   y <- predict(fit, dataWithoutLabel)
   loginfo("PredictoR.PredictModel.xgboost: end")
   return (y)
