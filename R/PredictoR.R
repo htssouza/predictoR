@@ -57,10 +57,12 @@ Predictor.BuildValidationData <- function(object, data, trainFolds) {
 
 Predictor.BuildTestData <- function(object) {
   loginfo("Predictor.BuildTestData: begin")
-  data <- data.table(object$params$getTestData())
-  data <- BuildFeatures(object, data)
+  if (! ("testData" %in% object)) {
+    object$testData <- data.table(object$params$getTestData())
+    object$testData <- BuildFeatures(object, object$testData)
+  }
   loginfo("Predictor.BuildTestData: end")
-  return (data)
+  return (object$testData)
 }
 
 Predictor.GetFormula <- function(object) {
