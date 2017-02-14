@@ -13,25 +13,25 @@ library(logging)
 # Functions
 ################################################################################
 
-Predictor.Fit.rpart <- function(object, modelMetadata, data) {
-  loginfo("Predictor.Fit.rpart: begin")
+PredictoR.Fit.rpart <- function(object, modelMetadata, data) {
+  loginfo("PredictoR.Fit.rpart: begin")
   library(rpart)
   control <- NULL
   if (! is.null(modelMetadata$minsplit)) {
     control <- rpart.control(minsplit=modelMetadata$minsplit)
   }
-  fit <- rpart(Predictor.GetFormula(object),
+  fit <- rpart(PredictoR.GetFormula(object),
                data=data,
                method=modelMetadata$method,
                control=control)
-  loginfo("Predictor.Fit.rpart: end")
+  loginfo("PredictoR.Fit.rpart: end")
   return (fit)
 }
 
-Predictor.PredictModel.rpart <- function(object, modelMetadata, fit, data) {
-  loginfo("Predictor.PredictModel.rpart: begin")
+PredictoR.PredictModel.rpart <- function(object, modelMetadata, fit, data) {
+  loginfo("PredictoR.PredictModel.rpart: begin")
   library(rpart)
   y <- predict(fit, data, type=modelMetadata$method)
-  loginfo("Predictor.PredictModel.rpart: end")
+  loginfo("PredictoR.PredictModel.rpart: end")
   return (y)
 }

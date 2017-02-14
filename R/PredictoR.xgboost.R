@@ -14,7 +14,7 @@ library(logging)
 ################################################################################
 
 PredictoR.BuildXGBData <- function(x, object, withLabel) {
-  loginfo("Predictor.BuildXGBData: begin")
+  loginfo("PredictoR.BuildXGBData: begin")
   library(xgboost)
   y <- matrix(nrow=nrow(x), ncol=nrow(object$params$featuresMetadata))
   colIndex <- 1
@@ -34,12 +34,12 @@ PredictoR.BuildXGBData <- function(x, object, withLabel) {
   } else {
     y <- xgb.DMatrix (as.matrix(y), missing=NaN)
   }
-  loginfo("Predictor.BuildXGBData: end")
+  loginfo("PredictoR.BuildXGBData: end")
   return (y)
 }
 
-Predictor.Fit.xgboost <- function(object, modelMetadata, dataWithLabel) {
-  loginfo("Predictor.Fit.xgboost: begin")
+PredictoR.Fit.xgboost <- function(object, modelMetadata, dataWithLabel) {
+  loginfo("PredictoR.Fit.xgboost: begin")
   library(xgboost)
   if (! is.null(modelMetadata$num_class)) {
     fit <- xgboost(dataWithLabel,
@@ -51,14 +51,14 @@ Predictor.Fit.xgboost <- function(object, modelMetadata, dataWithLabel) {
                    objective=modelMetadata$objective,
                    nrounds=modelMetadata$nrounds)
   }
-  loginfo("Predictor.Fit.xgboost: end")
+  loginfo("PredictoR.Fit.xgboost: end")
   return (fit)
 }
 
-Predictor.PredictModel.xgboost <- function(object, modelMetadata, fit, dataWithoutLabel) {
-  loginfo("Predictor.PredictModel.xgboost: begin")
+PredictoR.PredictModel.xgboost <- function(object, modelMetadata, fit, dataWithoutLabel) {
+  loginfo("PredictoR.PredictModel.xgboost: begin")
   library(xgboost)
   y <- predict(fit, dataWithoutLabel)
-  loginfo("Predictor.PredictModel.xgboost: end")
+  loginfo("PredictoR.PredictModel.xgboost: end")
   return (y)
 }

@@ -13,21 +13,21 @@ library(logging)
 # Functions
 ################################################################################
 
-Predictor.Fit.randomForest <- function(object, modelMetadata, data) {
-  loginfo("Predictor.Fit.randomForest: begin")
+PredictoR.Fit.randomForest <- function(object, modelMetadata, data) {
+  loginfo("PredictoR.Fit.randomForest: begin")
   library(randomForest)
-  fit <- randomForest(Predictor.GetFormula(object),
+  fit <- randomForest(PredictoR.GetFormula(object),
                data=data,
                method=modelMetadata$method,
                ntree=modelMetadata$ntree)
-  loginfo("Predictor.Fit.randomForest: end")
+  loginfo("PredictoR.Fit.randomForest: end")
   return (fit)
 }
 
-Predictor.PredictModel.randomForest <- function(object, modelMetadata, fit, data) {
-  loginfo("Predictor.PredictModel.randomForest: begin")
+PredictoR.PredictModel.randomForest <- function(object, modelMetadata, fit, data) {
+  loginfo("PredictoR.PredictModel.randomForest: begin")
   library(randomForest)
   y <- predict(fit, data, type=modelMetadata$method)
-  loginfo("Predictor.PredictModel.randomForest: end")
+  loginfo("PredictoR.PredictModel.randomForest: end")
   return (y)
 }
