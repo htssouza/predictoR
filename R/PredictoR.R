@@ -55,16 +55,6 @@ Predictor.BuildValidationData <- function(object, data, trainFolds) {
   return (data)
 }
 
-Predictor.BuildTestData <- function(object) {
-  loginfo("Predictor.BuildTestData: begin")
-  if (! ("testData" %in% object)) {
-    object$testData <- data.table(object$params$getTestData())
-    object$testData <- BuildFeatures(object, object$testData)
-  }
-  loginfo("Predictor.BuildTestData: end")
-  return (object$testData)
-}
-
 Predictor.GetFormula <- function(object) {
   featureNames <- object$params$featuresMetadata[, feature]
   formulaText <- paste0(object$params$responseColName, " ~ ", paste0(featureNames, collapse=" + "))
@@ -141,6 +131,18 @@ BuildFeatures.PredictoR <- function(object, data) {
   }
   loginfo("Predictor.BuildFeatures: end")
   return (data)
+}
+
+BuildTestData <- function(x, ...) UseMethod("BuildTestData")
+
+BuildTestData.Predictor <- function(object) {
+  loginfo("Predictor.BuildTestData: begin")
+  if (! ("testData" %in% object)) {
+    object$testData <- data.table(object$params$getTestData())
+    object$testData <- BuildFeatures(object, object$testData)
+  }
+  loginfo("Predictor.BuildTestData: end")
+  return (object$testData)
 }
 
 Execute <- function(x, ...) UseMethod("Execute")
@@ -242,7 +244,7 @@ Execute.PredictoR <- function(object) {
   if (! is.null(bestModelMetada)) {
     fit <- fits[[bestModelMetada$id]]
     loginfo("Predictor.Execute: building test data")
-    test <- Predictor.BuildTestData(object)
+    test <- BuildTestData(object)
     if (bestModelMetada$model == "xgboost") {
       test.xgboost <- PredictoR.BuildXGBData(test, object, withLabel=FALSE)
       predictionResponse <- Predictor.PredictModel(object, bestModelMetada, fit, test.xgboost)

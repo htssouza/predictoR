@@ -14,6 +14,7 @@ S3method(print, PredictoROutput)
 S3method(PredictoR, PredictoRParams)
 S3method(print, PredictoR)
 S3method(BuildFeatures, PredictoR)
+S3method(BuildTestData, PredictoR)
 S3method(Execute, PredictoR)
 
 # Exports
@@ -21,4 +22,5 @@ export(PredictoRParams)
 export(PredictoROutput)
 export(PredictoR)
 export(BuildFeatures)
+export(BuildTestData)
 export(Execute)
