@@ -249,9 +249,9 @@ Execute.PredictoR <- function(object) {
     test <- BuildTestData(object)
     if (bestModelMetada$model == "xgboost") {
       test.xgboost <- PredictoR.BuildXGBData(test, object, withLabel=FALSE)
-      predictionResponse <- PredictoR.PredictModel(object, bestModelMetada, fit, test.xgboost)
+      predictionResponse <- PredictModel(object, bestModelMetada, fit, test.xgboost)
     } else {
-      predictionResponse <- PredictoR.PredictModel(object, bestModelMetada, fit, test)
+      predictionResponse <- PredictModel(object, bestModelMetada, fit, test)
     }
     if (! is.null(object$params$normalizeResponse)) {
       predictionResponse <- object$params$normalizeResponse(predictionResponse)
