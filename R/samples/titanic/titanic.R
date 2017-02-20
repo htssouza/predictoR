@@ -74,12 +74,12 @@ BuildFeature.data.table <- function(x, feature) {
   }
 
   if (feature == "age2") {
-    # fill missing ages using title than global mean
+    # fill missing ages using title
     y <- x[, age]
     for(title in paste0("title.", kTitles)) {
       y[ is.na(y) & x[, get(title) == 1]] <- mean( x[ get(title) == 1 & !is.na(age), age] )
     }
-    # global
+    # use global mean (if still missing)
     y[ is.na(y) ] <- mean( x[ !is.na(age), age] )
   }
 
