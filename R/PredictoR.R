@@ -124,7 +124,7 @@ BuildTestData <- function(x, ...) UseMethod("BuildTestData")
 
 BuildTestData.PredictoR <- function(object) {
   loginfo("PredictoR.BuildTestData: begin")
-  if (! ("testDxata" %in% object)) {
+  if (! ("testData" %in% object)) {
     object$testData <- data.table(object$params$getTestData())
     object$testData <- BuildFeatures(object, object$testData)
   }
