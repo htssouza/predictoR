@@ -37,7 +37,7 @@ library(logging)
 # function descriptions:
 #
 #   buildFeature(x, feature)
-#     add specified feature on x dataset
+#     build feature for x dataset
 #
 #   getTrainData(sampleFactor, sampleSeed)
 #     return data.table with train data
@@ -49,7 +49,7 @@ library(logging)
 #     return validation score (better the higher)
 #
 #   normalizeResponse(response)
-#     return normalizedResponse
+#     return normalized response
 #
 ################################################################################
 
@@ -65,9 +65,9 @@ PredictoRParams.default <- function(idColName,
                                     modelsMetadata,
                                     buildFeature,
                                     getTrainData,
-                                    getTestData,
                                     evaluate,
-                                    normalizeResponse=NULL) {
+                                    normalizeResponse=NULL,
+                                    getTestData=NULL) {
   this <- list()
   this$idColName <- idColName
   this$responseColName <- responseColName
@@ -75,9 +75,9 @@ PredictoRParams.default <- function(idColName,
   this$modelsMetadata <- data.table(modelsMetadata)
   this$buildFeature <- buildFeature
   this$getTrainData <- getTrainData
-  this$getTestData <- getTestData
   this$evaluate <- evaluate
   this$normalizeResponse <- normalizeResponse
+  this$getTestData <- getTestData
   class(this) <- "PredictoRParams"
   return (this)
 }

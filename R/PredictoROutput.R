@@ -15,7 +15,7 @@ library(logging)
 
 PredictoROutput <- function(x, ...) UseMethod("PredictoROutput")
 
-PredictoROutput.PredictoRParams <- function(params, fits, prediction) {
+PredictoROutput.PredictoRParams <- function(params, fits, prediction=NULL) {
   this <- list()
   this$params <- params
   this$fits <- fits
