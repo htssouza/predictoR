@@ -124,7 +124,7 @@ GetModelsMetadata <- function() {
   trainFolds <- c(33:66)
 
   # build all combinations for rpart
-  minsplit <- ((1:10)*10)
+  minsplit <- 10:50
   rpartModels <- CJ(sampleFactor=sampleFactor,
                     sampleSeed=sampleSeed,
                     folds=folds,
