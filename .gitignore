@@ -1,4 +1,7 @@
+*.swp
 .Rproj.user
 .Rhistory
 .RData
 .Ruserdata
+xgboost.model
+

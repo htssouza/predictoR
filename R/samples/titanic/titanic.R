@@ -8,7 +8,8 @@
 # External dependencies
 ################################################################################
 
-for (.requirement in c("data.table", "devtools", "logging", "stringi")) {
+for (.requirement in c("data.table", "devtools", "logging", "randomForest",
+                       "stringi", "xgboost")) {
   if (! .requirement %in% rownames(installed.packages())) {
     install.packages(.requirement, repos="http://cran.rstudio.com/")
   }
@@ -17,7 +18,9 @@ for (.requirement in c("data.table", "devtools", "logging", "stringi")) {
 library(data.table)
 library(devtools)
 library(logging)
+library(randomForest)
 library(stringi)
+library(xgboost)
 
 # keep it updated
 install_github("htssouza/predictoR")
